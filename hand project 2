@@ -3,8 +3,8 @@ import math
 import numpy
 import random
 import time
-from hand_1_6 import HandDetector
-from hand_1_7 import put_text_rectangle
+from hand_mod_2 import HandDetector
+from hand_mod_3 import put_text_rectangle
 webcam = cv2.VideoCapture(0)
 WEBCAM_WIDTH = 1_280
 WEBCAM_HEIGHT = 720
