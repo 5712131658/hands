@@ -1,0 +1,41 @@
+import cv2
+import mediapipe
+import numpy
+from hand_1_7 import (calculate_angle,put_text_rectangle)
+mp_drawing = mediapipe.solutions.drawing_utils
+mp_pose = mediapipe.solutions.pose
+webcam = cv2.VideoCapture(0)
+webcam.set(3, 1_280)
+webcam.set(4, 720)
+counter = 0
+stage = 'down'
+with mp_pose.Pose(min_detection_confidence = 0.5,min_tracking_confidence = 0.5) as pose:
+    while webcam.isOpened() == True:
+        response, frame = webcam.read()
+        frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+        frame.flags.writeable = False
+        results = pose.process(frame)
+        frame.flags.writeable = True
+        frame = cv2.cvtColor(frame,cv2.COLOR_RGB2BGR)
+        try:
+            landmarks = results.pose_landmarks.landmark
+            shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+            elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+            wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+            angle = calculate_angle(a = shoulder,b = elbow,c = wrist)
+            put_text_rectangle(frame = frame,text = f'{angle:.3f}',position = tuple(numpy.multiply(elbow,[1_280, 720]).astype(int)))
+            if angle > 160:
+                stage = 'down'
+            if angle < 30 and stage == 'down':
+                stage = 'up'
+                counter += 1
+        except:
+            pass
+        put_text_rectangle(frame = frame,text = f'REPS: {counter:02d}',position = (100, 100))
+        put_text_rectangle(frame = frame,text = f'Stage: {stage.capitalize()}',position = (100, 150))
+        mp_drawing.draw_landmarks(frame,results.pose_landmarks,mp_pose.POSE_CONNECTIONS,mp_drawing.DrawingSpec(color = (245, 117, 66),thickness = 2,circle_radius = 2),mp_drawing.DrawingSpec(color = (245, 66, 230),thickness = 2,circle_radius = 2))
+        cv2.imshow('Webcam', frame)
+        if cv2.waitKey(1) & 0xFF == ord('*'):
+            break
+    webcam.release()
+    cv2.destroyAllWindows()
