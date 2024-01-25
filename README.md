@@ -3,7 +3,7 @@
 In here will be a set of projects that involve the use of hand detection
 such as games or practical use like exercise
 
-hand_1_5 , hand_1_6 and Hand_1_7 are modules required 
+hand_mod_1 , hand_mod_2 and Hand_mod_3 are modules required 
 
 Hand project 1 :
 
